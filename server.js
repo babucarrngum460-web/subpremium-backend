@@ -8,7 +8,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 dotenv.config();
 
 initializeApp({
-credential: cert(require("./serviceAccountKey.json")),
+credential: cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
 });
 
 const db = getFirestore();
