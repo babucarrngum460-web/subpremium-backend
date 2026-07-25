@@ -90,18 +90,18 @@ if (upload.asset_id) {
   playbackId = asset.playback_ids?.[0]?.id || null;
   assetStatus = asset.status || null;
 
-  if (asset.status === "ready" && playbackId) {
+if (asset.status === "ready" && playbackId) {
 
     await db.collection("videos")
-      .doc(upload.id)
-      .update({
-        status: "ready",
-        playbackId: playbackId,
-        hlsUrl: `https://stream.mux.com/${playbackId}.m3u8`,
-        thumbnailUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`
-      });
+        .doc(upload.id)
+        .set({
+            status: "ready",
+            playbackId: playbackId,
+            hlsUrl: `https://stream.mux.com/${playbackId}.m3u8`,
+            thumbnailUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`
+        }, { merge: true });
 
-  }
+}
 }
 
 res.json({
