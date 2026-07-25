@@ -71,7 +71,7 @@ app.post("/api/mux/create-upload", async (req, res) => {
 });
 
 // Check Upload Status
-app.get("/api/mux/create-upload", async (req, res) => {
+app.get("/api/mux/upload-status/:uploadId", async (req, res) => {
   try {
     const cleanUploadId = req.params.uploadId
       .replaceAll('"', "")
@@ -83,27 +83,44 @@ app.get("/api/mux/create-upload", async (req, res) => {
     let playbackId = null;
     let assetStatus = null;
 
-    if (upload.asset_id) {
-      const asset = await mux.video.assets.retrieve(upload.asset_id);
+let playbackId = null;
+let assetStatus = null;
 
-      playbackId = asset.playback_ids?.[0]?.id || null;
-      assetStatus = asset.status || null;
-    }
+if (upload.asset_id) {
 
-    res.json({
-      success: true,
-      uploadId: upload.id,
-      assetId: upload.asset_id || null,
-      uploadStatus: upload.status,
-      assetStatus,
-      playbackId,
-      hlsUrl: playbackId
+  const asset = await mux.video.assets.retrieve(upload.asset_id);
+
+  playbackId = asset.playback_ids?.[0]?.id || null;
+  assetStatus = asset.status || null;
+
+  if (asset.status === "ready" && playbackId) {
+
+    await db.collection("videos")
+      .doc(upload.id)
+      .update({
+        status: "ready",
+        playbackId: playbackId,
+        hlsUrl: `https://stream.mux.com/${playbackId}.m3u8`,
+        thumbnailUrl: `https://image.mux.com/${playbackId}/thumbnail.jpg`
+      });
+
+  }
+}
+
+res.json({
+    success: true,
+    status: assetStatus,
+    uploadId: upload.id,
+    assetId: upload.asset_id,
+    playbackId,
+    hlsUrl: playbackId
         ? `https://stream.mux.com/${playbackId}.m3u8`
         : null,
-      thumbnailUrl: playbackId
+    thumbnailUrl: playbackId
         ? `https://image.mux.com/${playbackId}/thumbnail.jpg`
-        : null,
-    });
+        : null
+});
+
   } catch (error) {
     console.error(error);
 
