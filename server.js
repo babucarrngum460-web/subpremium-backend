@@ -83,9 +83,6 @@ app.get("/api/mux/upload-status/:uploadId", async (req, res) => {
     let playbackId = null;
     let assetStatus = null;
 
-let playbackId = null;
-let assetStatus = null;
-
 if (upload.asset_id) {
 
   const asset = await mux.video.assets.retrieve(upload.asset_id);
